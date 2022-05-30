@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "air-sniper",
+  "private_key_id": "e536b6ac49dc6f1b5537b4619bd91794a90a7276",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC+fq++woRqQAsF\nkCmbQX2pS9RSvqP003jlnY9eIK8fekNqLRjUoDwhyMvYyIzJ6H0vs4Fe9LbLH7Ed\n+RoQGWAt619uRcF3p0u1bHyDBh9oeXKFUqaaWib6sqdd+ipYHs/xDDZW4W2BDpR3\nfeMOxOpkK6Cv7sDOVrjKVUwKrRBrXjxxWAo4nl63tohyMuHhDi1cTEZjLCEqk+AD\nLoxAQnwkMPj4O1TSnwWuFU1+uhXVUyjvd/v5oHie3XEZQIywrBJqJg0jjqSU+rmx\nFKIrAPhMRtrO1BMsbqIRTvTMXZlTgHK3Qca2DE0zxO+PWHAvkYFUdvjwTemOf5lW\nL4eCmvadAgMBAAECggEAJuClnwXFbwbTiQbfSvGegxD4DAwe255WL+yMYD5E52R1\nQkPia7CpHQ8FNWDWxPVXKUdWGapRbRqyc+bNMChxpeWB5DhF0BT7YVM7BSWYfuK8\nYePYnytThbo06Lvf7Pya3TvsEiavSdXPLKTrVG4RVTDHOmi8flAaJicq3gnsjjDC\n354HAo9rxQ4AY4ian3MsFeimegeY5nQoDnyVuQT6OxZIN13H4wgASfG8rhpoKtso\nrPrpzT4F1JTwCTSslesGBpunlhVVethLcae3VX//LkWXewjzMy9TGa9melRafzHQ\n5TV5rQ0G8lGNrvs+YueJ76PDbVyDmLd9gyOdOoee8QKBgQDn3mSVFrda4XJVHSB4\nm48agzQXInmp9eERkFpCQKCTs5uG5HE9mZxmQAzHyrMLw6FDYwx/VilmUALnEyig\nOIm1Jz/Z1csQEChFAhuUFN/9O4usgPhFE8bB6GFou+7MEFkZBrS3soDwhZyeA0cM\n4ztgeGyK8S/fA2VMW+pMtaHRkQKBgQDSUfuVsnn22xlLfarqFNx4dH2zG7yYxD3G\nl/yM60JRoYxJQ3i48sJ4MbfpmhJ9RYFFdde9uuj09vQi7KNj22LyrIOd83zbdkQK\nVYAsQF+pAzaW9BlTVybQqUUgu7MBT+n7RvWEN1GKaIbcFJ9XSP0H3UHQdEhuksHL\nMpFcY2kOTQKBgQDj8fIXz1k58uCfZB8D8ongmpOfGrlYqOw2hB73eulhyvRezD23\nPUhQDS+DSnZyXkQvJzSmCmJwvr/bwy3xNSPL/2X6FP+oLvonvUa3cT4yiVNqpu9r\nmWGQR49bk0XTP08YF0uaO9Yennu1q6sxtEIvOLQcc7eIGqJ/Su0vtG/8wQKBgQDR\nvhqErkl9SgDOzRM+f/FiWuHkVZveSY5F19pvekpX+CBcC+J/pvETRpnfZ9xae48w\ngxXUy2p4qTLNBWroMaha1HopceIpRqcSGzRIbSY4+dBd+C6tczNtUfFzdFxOybBQ\n+/HqmfRCcH1VS2egd1SHnDp/NQfq5YZIKzTVivoA3QKBgGdMCM5TeztjYnMLjj+P\njjgVH3V00sFvcb4WNTLbGh7jswjT24A/MKqXA2qbSUkDYoVqb/RiGsoEgXHmqAN2\norsm8LseQ3MqDxRXc5uEOsnkKCTtY0QRD+gLJROBPqd3ndyApH3pWnUhSs0QsX6y\n93/RW0z929tgEVu4sHAawVvV\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-pyb0f@air-sniper.iam.gserviceaccount.com",
+  "client_id": "102467540618418207218",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-pyb0f%40air-sniper.iam.gserviceaccount.com"
+}
