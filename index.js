@@ -19,12 +19,11 @@ async function run() {
 
     let list = await fsb.exportObj.getCollectionList();
     let filteredList = list.filter((i) => !excluded.includes(i));
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < filteredList.length; i++) {
       let collectionName = filteredList[i];
       let records = await fsb.exportCustom([collectionName]);
       const items = Object.values(records[collectionName]);
       const table = database.collection(collectionName);
-      // this option prevents additional documents from being inserted if one fails
       const options = { ordered: true };
       const result = await table.insertMany(items, options);
       console.log(`${result.insertedCount} documents were inserted`);
