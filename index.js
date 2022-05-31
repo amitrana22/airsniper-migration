@@ -48,9 +48,9 @@ async function run() {
 
       // Add users
       const userSnap = await _j(db.collection("users").where("orgId", "==", orgObject.id).get());
-      for (let userIndex = 0; userIndex <= userSnap.length; userIndex++) {
+      for (let userIndex = 0; userIndex < userSnap.length; userIndex++) {
         const userObject = userSnap[userIndex];
-        if (userObject.uid) {
+        if (userObject != undefined) {
           userObject.orgId = newOrgObject.insertedId.toString();
           await database.collection("users").insertOne(userObject);
         }
