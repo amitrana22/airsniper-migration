@@ -18,7 +18,8 @@ async function run() {
     const database = client.db('airsniper-dev');
 
     let list = await fsb.exportObj.getCollectionList();
-    let filteredList = list.filter((i) => !excluded.includes(i));
+    // let filteredList = list.filter((i) => !excluded.includes(i));
+    let filteredList = list;
     for (let i = 0; i < filteredList.length; i++) {
       let collectionName = filteredList[i];
       let records = await fsb.exportCustom([collectionName]);
