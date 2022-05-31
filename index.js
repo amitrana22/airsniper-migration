@@ -50,8 +50,10 @@ async function run() {
       const userSnap = await _j(db.collection("users").where("orgId", "==", orgObject.id).get());
       for (let userIndex = 0; userIndex <= userSnap.length; userIndex++) {
         const userObject = userSnap[userIndex];
-        userObject.orgId = newOrgObject.insertedId.toString();
-        await database.collection("users").insertOne(userObject);
+        if (userObject.uid) {
+          userObject.orgId = newOrgObject.insertedId.toString();
+          await database.collection("users").insertOne(userObject);
+        }
       }
     }
 
