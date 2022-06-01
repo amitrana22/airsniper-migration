@@ -77,7 +77,7 @@ async function _usersGroupsMembers(database) {
 
 async function _devices(database) {
   const devicesList = await _j(db.collection(cNames.devices).get());
-  for (let deviceIndex = 0; deviceIndex <= 50; deviceIndex++) {
+  for (let deviceIndex = 0; deviceIndex <= devicesList.length; deviceIndex++) {
     const devObj = devicesList[deviceIndex];
     if (devObj != undefined) {
       // Update device org based on Mongo Org
