@@ -1,4 +1,5 @@
 const firestoreBackup = require("@sgg10/firestore-backup");
+const fs = require("fs");
 const { mongoConnectionUri } = require("./config");
 const { cNames, _j, array, toDateTime } = require("./utils");
 const serviceAccount = require("./key.json");
@@ -8,7 +9,7 @@ let fsb = new firestoreBackup(serviceAccount, "https://air-sniper.firebaseio.com
 const client = new MongoClient(mongoConnectionUri);
 const db = fsb.app.app.firestore();
 const fbId = "fid";
-const logLimit = 100;
+const logLimit = 50;
 
 async function run() {
   try {
@@ -16,6 +17,7 @@ async function run() {
     const database = client.db("airsniper-dev");
     await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
     await _devices(database); // Import devices and their logs
+    fs.writeFileSync("log.txt", "completed");
   } finally {
     await client.close();
   }
