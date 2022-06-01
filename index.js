@@ -1,5 +1,6 @@
 const firestoreBackup = require("@sgg10/firestore-backup");
-const { mongoConnectionUri, cNames, _j, array } = require("./config");
+const { mongoConnectionUri } = require("./config");
+const { cNames, _j, array } = require("./utils");
 const serviceAccount = require("./key.json");
 var MongoClient = require("mongodb").MongoClient;
 
