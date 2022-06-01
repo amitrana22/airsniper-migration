@@ -18,9 +18,19 @@ const cNames = {
   terms_of_service_compliance: "terms_of_service_compliance",
   users: "users",
   wifiErrors: "wifiErrors",
+  stateLog: "stateLog",
+  responseLog: "responseLog",
+  connectionLog: "connectionLog",
+  commandLog: "commandLog",
 };
 
 const array = (records) => Object.values(records);
 const _j = async (query) => (await query).docs.map((doc) => doc.data());
 
-module.exports = { cNames, array, _j };
+const toDateTime = (secs) => {
+  var t = new Date(1970, 0, 1);
+  t.setSeconds(secs);
+  return t;
+};
+
+module.exports = { cNames, array, _j, toDateTime };
