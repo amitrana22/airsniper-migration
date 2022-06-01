@@ -40,6 +40,8 @@ async function _usersGroupsMembers(database) {
       if (userObject != undefined) {
         userObject.orgId = newOrgId;
         userObject[fbId] = userObject.uid;
+        if (userObject.createdAt != undefined) userObject.createdAt = toDateTime(userObject.createdAt._seconds);
+        if (userObject.updatedAt != undefined) userObject.updatedAt = toDateTime(userObject.updatedAt._seconds);
         await database.collection(cNames.users).insertOne(userObject);
       }
     }
