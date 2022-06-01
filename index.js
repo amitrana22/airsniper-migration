@@ -48,7 +48,7 @@ async function _usersGroupsMembers(database) {
       const memberObject = membersSnap[memberIndex];
       if (memberObject != undefined) {
         memberObject.orgId = newOrgId;
-        orgObject[fbId] = memberObject.id;
+        memberObject[fbId] = memberObject.id;
         delete memberObject.id;
         await database.collection(cNames.org_members).insertOne(memberObject);
       }
@@ -60,6 +60,8 @@ async function _usersGroupsMembers(database) {
       const groupObject = groupsSnap[groupIndex];
       if (groupObject != undefined) {
         groupObject.orgId = newOrgId;
+        groupObject[fbId] = groupObject.id;
+        delete groupObject.id;
         await database.collection(cNames.groups).insertOne(groupObject);
       }
     }
