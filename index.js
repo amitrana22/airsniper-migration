@@ -44,26 +44,26 @@ async function run() {
       const newOrgObject = await database.collection(cNames.orgs).insertOne(orgObject);
       const newOrgId = newOrgObject.insertedId.toString();
 
-      // // Add users
-      // const userSnap = await _j(db.collection(cNames.users).where("orgId", "==", orgObject.id).get());
-      // for (let userIndex = 0; userIndex < userSnap.length; userIndex++) {
-      //   const userObject = userSnap[userIndex];
-      //   if (userObject != undefined) {
-      //     userObject.orgId = newOrgId;
-      //     await database.collection(cNames.users).insertOne(userObject);
-      //   }
-      // }
+      // Add users
+      const userSnap = await _j(db.collection(cNames.users).where("orgId", "==", orgObject.id).get());
+      for (let userIndex = 0; userIndex < userSnap.length; userIndex++) {
+        const userObject = userSnap[userIndex];
+        if (userObject != undefined) {
+          userObject.orgId = newOrgId;
+          await database.collection(cNames.users).insertOne(userObject);
+        }
+      }
 
-      // // Add org members
-      // // TODO: UPDATE UID based on mongo ID
-      // const membersSnap = await _j(db.collection(cNames.org_members).where("orgId", "==", orgObject.id).get());
-      // for (let memberIndex = 0; memberIndex < membersSnap.length; memberIndex++) {
-      //   const memberObject = membersSnap[memberIndex];
-      //   if (memberObject != undefined) {
-      //     memberObject.orgId = newOrgId;
-      //     await database.collection(cNames.org_members).insertOne(memberObject);
-      //   }
-      // }
+      // Add org members
+      // TODO: UPDATE UID based on mongo ID
+      const membersSnap = await _j(db.collection(cNames.org_members).where("orgId", "==", orgObject.id).get());
+      for (let memberIndex = 0; memberIndex < membersSnap.length; memberIndex++) {
+        const memberObject = membersSnap[memberIndex];
+        if (memberObject != undefined) {
+          memberObject.orgId = newOrgId;
+          await database.collection(cNames.org_members).insertOne(memberObject);
+        }
+      }
 
       // Add org groups
       const groupsSnap = await _j(db.collection(cNames.groups).where("orgId", "==", orgObject.id).get());
