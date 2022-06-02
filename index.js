@@ -5,6 +5,8 @@ const { cNames, _j, array, toDateTime } = require("./utils");
 const serviceAccount = require("./key.json");
 var MongoClient = require("mongodb").MongoClient;
 
+let logger = fs.createWriteStream(__dirname + "/debug.log", { flags: "w" });
+
 let fsb = new firestoreBackup(serviceAccount, "https://air-sniper.firebaseio.com");
 const client = new MongoClient(mongoConnectionUri);
 const db = fsb.app.app.firestore();
@@ -15,9 +17,15 @@ async function run() {
   try {
     await client.connect();
     const database = client.db("airsniper-dev");
-    await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
-    await _devices(database); // Import devices and their logs
-    fs.writeFileSync("log.txt", "completed");
+
+    logger.write(`Started at: ${new Date()} \n`);
+
+    // await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
+    // await _devices(database); // Import devices and their logs
+    // await _firmwares(database); // Import firmwares
+    await _schedules(database); // Import schedules
+
+    logger.write(`Completed at: ${new Date()}`);
   } finally {
     await client.close();
   }
@@ -49,7 +57,6 @@ async function _usersGroupsMembers(database) {
     }
 
     // Add org members
-    // TODO: UPDATE UID based on mongo ID
     const membersSnap = await _j(db.collection(cNames.org_members).where("orgId", "==", orgObject[fbId]).get());
     for (let memberIndex = 0; memberIndex < membersSnap.length; memberIndex++) {
       const memberObject = membersSnap[memberIndex];
@@ -96,8 +103,7 @@ async function _devices(database) {
 
       if (devObj.serial != undefined) devObj.serial[fbId] = devObj.serial;
 
-      if (devObj.lastDisconnectedAt != undefined)
-        devObj.lastDisconnectedAt = toDateTime(devObj.lastDisconnectedAt._seconds);
+      if (devObj.lastDisconnectedAt != undefined) devObj.lastDisconnectedAt = toDateTime(devObj.lastDisconnectedAt._seconds);
 
       if (devObj.deviceSwitchedOn != undefined) devObj.deviceSwitchedOn = toDateTime(devObj.deviceSwitchedOn._seconds);
       if (devObj.lastFwAt != undefined) devObj.lastFwAt = toDateTime(devObj.lastFwAt._seconds);
@@ -125,9 +131,7 @@ async function rotateLogs(database, collectionName, serial) {
       break;
   }
 
-  const logs = await _j(
-    db.collection(`${cNames.devices}/${serial}/${collectionName}`).orderBy(atParamName, "desc").limit(logLimit).get()
-  );
+  const logs = await _j(db.collection(`${cNames.devices}/${serial}/${collectionName}`).orderBy(atParamName, "desc").limit(logLimit).get());
 
   for (let logIndex = 0; logIndex < logs.length; logIndex++) {
     const logObject = logs[logIndex];
@@ -139,5 +143,60 @@ async function rotateLogs(database, collectionName, serial) {
     }
   }
 }
+
+async function _firmwares(database) {
+  const firmwaresList = await _j(db.collection(cNames.firmware).get());
+  for (let firmwareIndex = 0; firmwareIndex < firmwaresList.length; firmwareIndex++) {
+    let firmwareObject = firmwaresList[firmwareIndex];
+    if (firmwareObject != undefined) {
+      if (firmwareObject.createdAt != undefined) firmwareObject.createdAt = toDateTime(firmwareObject.createdAt._seconds);
+
+      if (firmwareObject.createdBy != undefined) {
+        let userItem = await database.collection(cNames.users).findOne({ [fbId]: firmwareObject.createdBy });
+        firmwareObject.createdBy = !userItem ? await adminUser(database) : userItem.uid;
+      }
+
+      const files = await _j(db.collection(`${cNames.firmware}/${firmwareObject.version}/files`).get());
+      if (files.length) {
+        firmwareObject.image1 = { file: files[0].file };
+        firmwareObject.image2 = { file: files[1].file };
+      }
+
+      if (firmwareObject.orgId != "any") {
+        let newOrgIds = [];
+        for (let item of firmwareObject.orgId) {
+          const orgItem = await database.collection(cNames.orgs).findOne({ [fbId]: item });
+          newOrgIds.push(orgItem._id.toString());
+        }
+        firmwareObject.orgId = newOrgIds;
+      }
+
+      await database.collection("firmwares").insertOne(firmwareObject);
+    }
+  }
+}
+
+const adminUser = async (database) => {
+  const admin = await database.collection(cNames.users).findOne({ email: "admin@yopmail.com" });
+  return admin.uid;
+};
+
+const _schedules = async (database) => {
+  const schedulesList = await _j(db.collection(cNames.schedules).get());
+  for (let scheduleObject of schedulesList) {
+    scheduleObject[fbId] = scheduleObject.id;
+    if (scheduleObject.orgId) {
+      const orgItem = await database.collection(cNames.orgs).findOne({ [fbId]: scheduleObject.orgId });
+      scheduleObject.orgId = orgItem._id.toString();
+    }
+
+    if (scheduleObject.start_date_time != undefined) scheduleObject.start_date_time = toDateTime(scheduleObject.start_date_time._seconds);
+    if (scheduleObject.end_date_time != undefined) scheduleObject.end_date_time = toDateTime(scheduleObject.end_date_time._seconds);
+    if (scheduleObject.updated_at != undefined) scheduleObject.updated_at = toDateTime(scheduleObject.updated_at._seconds);
+    if (scheduleObject.createdAt != undefined) scheduleObject.createdAt = toDateTime(scheduleObject.createdAt._seconds);
+
+    console.log(scheduleObject);
+  }
+};
 
 run().catch(console.dir);
