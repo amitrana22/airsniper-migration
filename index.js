@@ -23,7 +23,8 @@ async function run() {
     // await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
     // await _devices(database); // Import devices and their logs
     // await _firmwares(database); // Import firmwares
-    await _schedules(database); // Import schedules
+    // await _schedules(database); // Import schedules
+    await _notifications(database); // Import notifications
 
     logger.write(`Completed at: ${new Date()}`);
   } finally {
@@ -91,13 +92,13 @@ async function _devices(database) {
     if (devObj != undefined) {
       // Update device org based on Mongo Org
       if (devObj.orgId != undefined) {
-        const orgItem = await database.collection(cNames.orgs).findOne({ [fbId]: devObj.orgId });
+        const orgItem = await getOrg(database, devObj.orgId);
         devObj.orgId = orgItem._id.toString();
       }
 
       // Update device group based on Mongo device
       if (devObj.groupName != undefined) {
-        const groupItem = await database.collection(cNames.groups).findOne({ [fbId]: devObj.groupName });
+        const groupItem = await getGroup(database, devObj.groupName);
         if (groupItem) devObj.groupName = groupItem._id.toString();
       }
 
@@ -165,7 +166,7 @@ async function _firmwares(database) {
       if (firmwareObject.orgId != "any") {
         let newOrgIds = [];
         for (let item of firmwareObject.orgId) {
-          const orgItem = await database.collection(cNames.orgs).findOne({ [fbId]: item });
+          const orgItem = await getOrg(database, item);
           newOrgIds.push(orgItem._id.toString());
         }
         firmwareObject.orgId = newOrgIds;
@@ -181,12 +182,21 @@ const adminUser = async (database) => {
   return admin.uid;
 };
 
+const getOrg = async (database, id) => await database.collection(cNames.orgs).findOne({ [fbId]: id });
+const getGroup = async (database, id) => {
+  let obj = await database.collection(cNames.groups).findOne({ [fbId]: id });
+  if (!obj) obj = await database.collection(cNames.groups).findOne({ groupName: id });
+  return obj;
+};
+
 const _schedules = async (database) => {
   const schedulesList = await _j(db.collection(cNames.schedules).get());
   for (let scheduleObject of schedulesList) {
-    scheduleObject[fbId] = scheduleObject.id;
+    const sID = scheduleObject.id;
+    delete scheduleObject.id;
+    scheduleObject[fbId] = sID;
     if (scheduleObject.orgId) {
-      const orgItem = await database.collection(cNames.orgs).findOne({ [fbId]: scheduleObject.orgId });
+      const orgItem = await getOrg(database, scheduleObject.orgId);
       scheduleObject.orgId = orgItem._id.toString();
     }
 
@@ -195,7 +205,48 @@ const _schedules = async (database) => {
     if (scheduleObject.updated_at != undefined) scheduleObject.updated_at = toDateTime(scheduleObject.updated_at._seconds);
     if (scheduleObject.createdAt != undefined) scheduleObject.createdAt = toDateTime(scheduleObject.createdAt._seconds);
 
-    console.log(scheduleObject);
+    const newSchedule = await database.collection(cNames.schedules).insertOne(scheduleObject);
+
+    // Insert schedule items
+    const scheduleItems = await _j(db.collection(cNames.schedule_items).where("schedule_id", "==", sID).get());
+    for (let sItem of scheduleItems) {
+      if (sItem.org_id != undefined) sItem.org_id = (await getOrg(database, sItem.org_id))._id.toString();
+      if (sItem.group_id != undefined) sItem.group_id = (await getGroup(database, sItem.group_id))._id.toString();
+      delete sItem.id;
+      sItem.schedule_id = newSchedule.insertedId.toString();
+      await database.collection(cNames.schedule_items).insertOne(sItem);
+    }
+  }
+};
+
+const _notifications = async (database) => {
+  const notificationList = await _j(db.collection(cNames.notifications_items).get());
+  for (let notificationObject of notificationList) {
+    const nID = notificationObject.id;
+    delete notificationObject.id;
+    notificationObject[fbId] = nID;
+
+    if (notificationObject.updated_at != undefined) notificationObject.updated_at = toDateTime(notificationObject.updated_at._seconds);
+    if (notificationObject.createdAt != undefined) notificationObject.createdAt = toDateTime(notificationObject.createdAt._seconds);
+    if (notificationObject.orgId) notificationObject.orgId = (await getOrg(database, notificationObject.orgId))._id.toString();
+
+    const newNotification = await database.collection(cNames.notifications).insertOne(notificationObject);
+    const id = newNotification.insertedId.toString();
+
+    await rotateSubItems(database, cNames.notifications_items, id, nID); // Insert notification items
+    await rotateSubItems(database, cNames.notification_logs, id, nID); // Insert notification items
+  }
+};
+
+const rotateSubItems = async (database, collectionName, id, nID) => {
+  let items = await _j(db.collection(collectionName).where("notification_id", "==", nID).get());
+  for (let item of items) {
+    if (item.last_notification_sent_at && item.last_notification_sent_at != null)
+      item.last_notification_sent_at = toDateTime(item.last_notification_sent_at._seconds);
+    if (item.createdAt != undefined) item.createdAt = toDateTime(item.createdAt._seconds);
+    item.notification_id = id;
+    delete item.id;
+    await database.collection(collectionName).insertOne(item);
   }
 };
 
