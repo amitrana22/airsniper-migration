@@ -220,7 +220,7 @@ const _schedules = async (database) => {
 };
 
 const _notifications = async (database) => {
-  const notificationList = await _j(db.collection(cNames.notifications_items).get());
+  const notificationList = await _j(db.collection(cNames.notifications).get());
   for (let notificationObject of notificationList) {
     const nID = notificationObject.id;
     delete notificationObject.id;
