@@ -20,10 +20,10 @@ async function run() {
 
     logger.write(`Started at: ${new Date()} \n`);
 
-    // await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
-    // await _devices(database); // Import devices and their logs
-    // await _firmwares(database); // Import firmwares
-    // await _schedules(database); // Import schedules
+    await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
+    await _devices(database); // Import devices and their logs
+    await _firmwares(database); // Import firmwares
+    await _schedules(database); // Import schedules
     await _notifications(database); // Import notifications
 
     logger.write(`Completed at: ${new Date()}`);
