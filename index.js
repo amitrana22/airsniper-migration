@@ -27,6 +27,8 @@ async function run() {
     await _notifications(database); // Import notifications
 
     logger.write(`Completed at: ${new Date()}`);
+  } catch (err) {
+    logger.write(`Error at: ${new Date()} \n\n\n ================ \n\n\n ${err.stack} \n\n\n ============`);
   } finally {
     await client.close();
   }
@@ -250,4 +252,4 @@ const rotateSubItems = async (database, collectionName, id, nID) => {
   }
 };
 
-run().catch(console.dir);
+run();
