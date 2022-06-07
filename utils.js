@@ -24,13 +24,19 @@ const cNames = {
   commandLog: "commandLog",
 };
 
+const threeLevels = {
+  org: 1,
+  group: 2,
+  device: 3,
+};
+
 const array = (records) => Object.values(records);
 const _j = async (query) => (await query).docs.map((doc) => doc.data());
 
-const toDateTime = (secs) => {
+const toDateTime = (secs, m = false) => {
   var t = new Date(1970, 0, 1);
-  t.setSeconds(secs);
+  !m ? t.setSeconds(secs) : t.setMilliseconds(secs);
   return t;
 };
 
-module.exports = { cNames, array, _j, toDateTime };
+module.exports = { cNames, array, _j, toDateTime, threeLevels };

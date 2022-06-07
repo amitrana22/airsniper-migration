@@ -1,7 +1,7 @@
 const firestoreBackup = require("@sgg10/firestore-backup");
 const fs = require("fs");
 const { mongoConnectionUri } = require("./config");
-const { cNames, _j, array, toDateTime } = require("./utils");
+const { cNames, _j, array, toDateTime, threeLevels } = require("./utils");
 const serviceAccount = require("./key.json");
 var MongoClient = require("mongodb").MongoClient;
 
@@ -13,6 +13,33 @@ const db = fsb.app.app.firestore();
 const fbId = "fid";
 const logLimit = 50;
 
+const users = require("./users.json").users;
+
+async function passwords() {
+  try {
+    await client.connect();
+    const database = client.db("airsniper-dev");
+
+    for (let user of users) {
+      const updateObject = {};
+      if (user.lastSignedInAt != undefined) updateObject.lastLoggedInAt = toDateTime(user.lastSignedInAt, true);
+      else updateObject.createdAt = toDateTime(user.createdAt, true);
+      if (user.createdAt != undefined) updateObject.createdAt = toDateTime(user.createdAt, true);
+      await database.collection(cNames.users).updateOne(
+        { email: user.email },
+        {
+          $set: updateObject,
+          $unset: { passwordHash: user.passwordHash, salt: user.salt },
+        }
+      );
+    }
+  } catch (err) {
+    logger.write(`Error at: ${new Date()} \n\n\n ================ \n\n\n ${err.stack} \n\n\n ============`);
+  } finally {
+    await client.close();
+  }
+}
+
 async function run() {
   try {
     await client.connect();
@@ -20,10 +47,10 @@ async function run() {
 
     logger.write(`Started at: ${new Date()} \n`);
 
-    await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
-    await _devices(database); // Import devices and their logs
-    await _firmwares(database); // Import firmwares
-    await _schedules(database); // Import schedules
+    // await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
+    // await _devices(database); // Import devices and their logs
+    // await _firmwares(database); // Import firmwares
+    // await _schedules(database); // Import schedules
     await _notifications(database); // Import notifications
 
     logger.write(`Completed at: ${new Date()}`);
@@ -231,6 +258,20 @@ const _notifications = async (database) => {
     if (notificationObject.updated_at != undefined) notificationObject.updated_at = toDateTime(notificationObject.updated_at._seconds);
     if (notificationObject.createdAt != undefined) notificationObject.createdAt = toDateTime(notificationObject.createdAt._seconds);
     if (notificationObject.orgId) notificationObject.orgId = (await getOrg(database, notificationObject.orgId))._id.toString();
+    let updated = [];
+    for (let createdId of notificationObject.notification_created_ids) {
+      let id = createdId;
+      switch (notificationObject.notification_for) {
+        case threeLevels.org:
+          id = (await getOrg(database, createdId))._id.toString();
+          break;
+        case threeLevels.group:
+          id = (await getGroup(database, createdId))._id.toString();
+          break;
+      }
+      updated.push(id);
+    }
+    notificationObject.notification_created_ids = updated;
 
     const newNotification = await database.collection(cNames.notifications).insertOne(notificationObject);
     const id = newNotification.insertedId.toString();
