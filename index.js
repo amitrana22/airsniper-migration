@@ -47,10 +47,10 @@ async function run() {
 
     logger.write(`Started at: ${new Date()} \n`);
 
-    // await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
-    // await _devices(database); // Import devices and their logs
-    // await _firmwares(database); // Import firmwares
-    // await _schedules(database); // Import schedules
+    await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
+    await _devices(database); // Import devices and their logs
+    await _firmwares(database); // Import firmwares
+    await _schedules(database); // Import schedules
     await _notifications(database); // Import notifications
 
     logger.write(`Completed at: ${new Date()}`);
@@ -125,6 +125,21 @@ async function _devices(database) {
         devObj.orgId = orgItem._id.toString();
       }
 
+      if (devObj.state != undefined) {
+        let currentState = devObj.state;
+        if (currentState.at != undefined) currentState.at = toDateTime(currentState.at._seconds);
+        devObj.state = currentState;
+      }
+
+      if (devObj.maintenance != undefined && typeof maintenance == "object") {
+        let updated = [];
+        for (let mObject of devObj.maintenance) {
+          if (mObject.at != undefined) mObject.at = toDateTime(mObject.at._seconds);
+          updated.push(mObject);
+        }
+        devObj.maintenance = updated;
+      }
+
       // Update device group based on Mongo device
       if (devObj.groupName != undefined) {
         const groupItem = await getGroup(database, devObj.groupName);
@@ -161,7 +176,7 @@ async function rotateLogs(database, collectionName, serial) {
       break;
   }
 
-  const logs = await _j(db.collection(`${cNames.devices}/${serial}/${collectionName}`).orderBy(atParamName, "desc").limit(logLimit).get());
+  const logs = await _j(db.collection(`${cNames.devices}/${serial}/${collectionName}`).orderBy(atParamName, "desc").get());
 
   for (let logIndex = 0; logIndex < logs.length; logIndex++) {
     const logObject = logs[logIndex];
