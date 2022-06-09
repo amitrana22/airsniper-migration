@@ -11,7 +11,7 @@ let fsb = new firestoreBackup(serviceAccount, "https://air-sniper.firebaseio.com
 const client = new MongoClient(mongoConnectionUri);
 const db = fsb.app.app.firestore();
 const fbId = "fid";
-const logLimit = 50;
+const logLimit = 500;
 
 const users = require("./users.json").users;
 
@@ -176,7 +176,7 @@ async function rotateLogs(database, collectionName, serial) {
       break;
   }
 
-  const logs = await _j(db.collection(`${cNames.devices}/${serial}/${collectionName}`).orderBy(atParamName, "desc").get());
+  const logs = await _j(db.collection(`${cNames.devices}/${serial}/${collectionName}`).orderBy(atParamName, "desc").limit(logLimit).get());
 
   for (let logIndex = 0; logIndex < logs.length; logIndex++) {
     const logObject = logs[logIndex];
