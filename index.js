@@ -15,6 +15,26 @@ const logLimit = 500;
 
 const users = require("./users.json").users;
 
+const termsOfServiceId = "62a18dca8edf472f26437618";
+
+async function terms() {
+  try {
+    await client.connect();
+    const database = client.db("airsniper-dev");
+    const termsList = await _j(db.collection(cNames.terms_of_service_compliance).get());
+    for (let term of termsList) {
+      term.termsOfServiceId = termsOfServiceId;
+      if (term.lastSignedInAt != undefined) term.createdAt = toDateTime(term.createdAt._seconds);
+      delete term.id;
+      await database.collection(cNames.terms_of_service_compliance + "s").insertOne(term);
+    }
+  } catch (err) {
+    logger.write(`Error at: ${new Date()} \n\n\n ================ \n\n\n ${err.stack} \n\n\n ============`);
+  } finally {
+    await client.close();
+  }
+}
+
 async function passwords() {
   try {
     await client.connect();
@@ -47,7 +67,7 @@ async function run() {
 
     logger.write(`Started at: ${new Date()} \n`);
 
-    await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
+    // await _usersGroupsMembers(database); // Import orgs, users, org_members and groups
     await _devices(database); // Import devices and their logs
     await _firmwares(database); // Import firmwares
     await _schedules(database); // Import schedules
