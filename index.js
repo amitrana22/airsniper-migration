@@ -11,7 +11,7 @@ let fsb = new firestoreBackup(serviceAccount, "https://air-sniper.firebaseio.com
 const client = new MongoClient(mongoConnectionUri);
 const db = fsb.app.app.firestore();
 const fbId = "fid";
-const logLimit = 500;
+const logLimit = 200;
 
 const users = require("./users.json").users;
 
